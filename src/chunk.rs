@@ -1,5 +1,5 @@
 use crate::chunk_type::ChunkType;
-use crate::{Error, Result};
+use crate::{MyError, Result};
 use crc::{Crc, CRC_32_ISO_HDLC};
 use std::fmt::Display;
 use std::io::{BufReader, Read};
@@ -34,7 +34,7 @@ impl Display for ChunkDecodingError {
 impl std::error::Error for ChunkDecodingError {}
 
 impl TryFrom<&[u8]> for Chunk {
-    type Error = Error;
+    type Error = MyError;
     fn try_from(value: &[u8]) -> Result<Self> {
         let mut reader = BufReader::new(value);
         let mut buf: [u8; 4] = [0; 4];
@@ -100,15 +100,18 @@ impl Chunk {
             crc,
         }
     }
+    #[cfg(test)]
     fn length(&self) -> u32 {
         self.length
     }
     pub fn chunk_type(&self) -> &ChunkType {
         &self.chunk_type
     }
+    #[cfg(test)]
     fn data(&self) -> &[u8] {
         &self.chunk_data
     }
+    #[cfg(test)]
     fn crc(&self) -> u32 {
         self.crc
     }

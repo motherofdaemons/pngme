@@ -4,14 +4,14 @@ use std::str::FromStr;
 
 use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
-use crate::{Error, Result};
+use crate::{MyError, Result};
 
-struct Png {
+pub struct Png {
     chunks: Vec<Chunk>,
 }
 
 impl TryFrom<&[u8]> for Png {
-    type Error = Error;
+    type Error = MyError;
     fn try_from(value: &[u8]) -> Result<Self> {
         let mut reader = BufReader::new(value);
         let mut header: [u8; 8] = [0; 8];
@@ -49,10 +49,10 @@ impl Png {
     fn from_chunks(chunks: Vec<Chunk>) -> Png {
         Self { chunks }
     }
-    fn append_chunk(&mut self, chunk: Chunk) {
+    pub fn append_chunk(&mut self, chunk: Chunk) {
         self.chunks.push(chunk);
     }
-    fn remove_chunk(&mut self, chunk_type: &str) -> Result<Chunk> {
+    pub fn remove_chunk(&mut self, chunk_type: &str) -> Result<Chunk> {
         let chunk_type: ChunkType = ChunkType::from_str(chunk_type).unwrap();
         if let Some(index) = self
             .chunks
@@ -67,14 +67,14 @@ impl Png {
     fn header(&self) -> &[u8; 8] {
         &Self::STANDARD_HEADER
     }
-    fn chunks(&self) -> &[Chunk] {
+    pub fn chunks(&self) -> &[Chunk] {
         self.chunks.as_ref()
     }
-    fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
+    pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
         let chunk_type: ChunkType = ChunkType::from_str(chunk_type).unwrap();
         self.chunks.iter().find(|c| c.chunk_type() == &chunk_type)
     }
-    fn as_bytes(&self) -> Vec<u8> {
+    pub fn as_bytes(&self) -> Vec<u8> {
         let chunk_iterators: Vec<u8> = self.chunks.iter().map(|c| c.as_bytes()).flatten().collect();
         self.header()
             .iter()

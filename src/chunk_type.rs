@@ -1,4 +1,4 @@
-use crate::{Error, Result};
+use crate::{MyError, Result};
 use std::{fmt::Display, str::FromStr};
 
 #[derive(Debug)]
@@ -33,22 +33,27 @@ impl ChunkType {
     pub fn bytes(&self) -> [u8; 4] {
         self.raw_bytes
     }
+    #[cfg(test)]
     fn is_valid(&self) -> bool {
         // all bits must be between a-z or A-Z and the reserved bit but be valid
         self.raw_bytes.iter().all(|&b| b.is_ascii_alphabetic()) && self.is_reserved_bit_valid()
     }
+    #[cfg(test)]
     fn is_critical(&self) -> bool {
         // check to see if the ancillary bit is not set
         self.raw_bytes[0] & (1 << 5) == 0
     }
+    #[cfg(test)]
     fn is_public(&self) -> bool {
         // check to see if the private bit is not set
         self.raw_bytes[1] & (1 << 5) == 0
     }
+    #[cfg(test)]
     fn is_reserved_bit_valid(&self) -> bool {
         // check to see if the reserved bit is not set
         self.raw_bytes[2] & (1 << 5) == 0
     }
+    #[cfg(test)]
     fn is_safe_to_copy(&self) -> bool {
         // check to see if the safe to copy bit is set
         self.raw_bytes[3] & (1 << 5) != 0
@@ -56,14 +61,14 @@ impl ChunkType {
 }
 
 impl TryFrom<[u8; 4]> for ChunkType {
-    type Error = Error;
+    type Error = MyError;
     fn try_from(value: [u8; 4]) -> Result<Self> {
         Ok(Self { raw_bytes: value })
     }
 }
 
 impl FromStr for ChunkType {
-    type Err = Error;
+    type Err = MyError;
     fn from_str(s: &str) -> Result<Self> {
         let bytes = s.as_bytes();
         if bytes.len() != 4 {
