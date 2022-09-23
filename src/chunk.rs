@@ -6,7 +6,7 @@ use std::io::{BufReader, Read};
 
 const MAXIMUM_LENGTH: u32 = (1 << 31) - 1;
 
-struct Chunk {
+pub struct Chunk {
     length: u32,
     chunk_type: ChunkType,
     chunk_data: Vec<u8>,
@@ -67,7 +67,7 @@ impl TryFrom<&[u8]> for Chunk {
             .collect();
         let crc = Crc::<u32>::new(&CRC_32_ISO_HDLC).checksum(&bytes);
         if provided_crc != crc {
-            return Err(ChunkDecodingError::boxed(format!("Bad crc given!")));
+            return Err(ChunkDecodingError::boxed(format!("Bad crc given {} expected {}!", provided_crc, crc)));
         }
         Ok(Self {
             length,
@@ -85,7 +85,7 @@ impl Display for Chunk {
 }
 
 impl Chunk {
-    fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
+    pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         let bytes: Vec<u8> = chunk_type
             .bytes()
             .iter()
@@ -103,7 +103,7 @@ impl Chunk {
     fn length(&self) -> u32 {
         self.length
     }
-    fn chunk_type(&self) -> &ChunkType {
+    pub fn chunk_type(&self) -> &ChunkType {
         &self.chunk_type
     }
     fn data(&self) -> &[u8] {
@@ -112,10 +112,10 @@ impl Chunk {
     fn crc(&self) -> u32 {
         self.crc
     }
-    fn data_as_string(&self) -> Result<String> {
+    pub fn data_as_string(&self) -> Result<String> {
         Ok(String::from_utf8(self.chunk_data.clone()).map_err(Box::new)?)
     }
-    fn as_bytes(&self) -> Vec<u8> {
+    pub fn as_bytes(&self) -> Vec<u8> {
         self.length
             .to_be_bytes()
             .iter()
