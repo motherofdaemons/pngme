@@ -25,12 +25,12 @@ impl Display for ChunkTypeError {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-struct ChunkType {
+pub struct ChunkType {
     raw_bytes: [u8; 4],
 }
 
 impl ChunkType {
-    fn bytes(&self) -> [u8; 4] {
+    pub fn bytes(&self) -> [u8; 4] {
         self.raw_bytes
     }
     fn is_valid(&self) -> bool {
@@ -58,7 +58,7 @@ impl ChunkType {
 impl TryFrom<[u8; 4]> for ChunkType {
     type Error = Error;
     fn try_from(value: [u8; 4]) -> Result<Self> {
-        Ok(ChunkType { raw_bytes: value })
+        Ok(Self { raw_bytes: value })
     }
 }
 
@@ -73,8 +73,7 @@ impl FromStr for ChunkType {
         if !valid_chars {
             return Err(Box::new(ChunkTypeError::InvalidCharacter));
         }
-        let sized: [u8; 4] = [bytes[0], bytes[1], bytes[2], bytes[3]];
-        Ok(ChunkType { raw_bytes: sized })
+        Ok(Self { raw_bytes: bytes.try_into()? })
     }
 }
 
